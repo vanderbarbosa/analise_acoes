@@ -1,0 +1,32 @@
+# Core web
+flask>=3.0,<4.0
+jinja2>=3.1
+python-dotenv>=1.0
+
+# Data
+yfinance>=0.2.40
+pandas>=2.1,<2.3
+numpy>=1.26,<2.0
+
+# Charts
+plotly>=5.20
+
+# Database
+sqlalchemy>=2.0
+
+# Scheduling
+apscheduler>=3.10
+
+# News pipeline
+feedparser>=6.0
+requests>=2.31
+beautifulsoup4>=4.12
+lxml>=5.0
+
+# NLP (instalar separadamente quando for ativar pipeline de notícias)
+# transformers>=4.40
+# torch>=2.2
+# sentencepiece>=0.2
+
+# Tests
+pytest>=8.0

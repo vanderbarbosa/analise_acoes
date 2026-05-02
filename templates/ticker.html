@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ symbol }} — Análise de Ações{% endblock %}
+{% block content %}
+<div class="ticker-head">
+  <h1>{{ symbol }} <small class="muted">{{ name }}</small></h1>
+  {% if latest %}
+    <div class="ticker-last">
+      <strong>{{ latest.close|brl }}</strong>
+      <span class="muted">em {{ latest.trade_date|d }}</span>
+    </div>
+  {% endif %}
+</div>
+
+{% if prediction %}
+<section class="panel">
+  <h2>Projeção próximo pregão ({{ prediction.for_date|d }})</h2>
+  <div class="prediction-box prediction-{{ prediction.direction }}">
+    <div class="big">{{ prediction.direction|upper }} {{ prediction.magnitude_pct|pct }}</div>
+    <div class="muted">confiança {{ "%.0f"|format(prediction.confidence * 100) }}%</div>
+  </div>
+  <p class="rationale"><code>{{ prediction.rationale }}</code></p>
+</section>
+{% else %}
+<section class="panel"><em>Sem projeção gerada ainda. Rode <code>python -m src.jobs.daily</code>.</em></section>
+{% endif %}
+
+<section class="panel">
+  <h2>Preço + indicadores (últimos 120 pregões)</h2>
+  {{ chart_html|safe }}
+  {% if latest %}
+  <table class="indicators">
+    <tr><th>RSI</th><td>{{ "%.1f"|format(latest.rsi) if latest.rsi is not none else "—" }}</td>
+        <th>MACD hist</th><td>{{ "%.3f"|format(latest.macd_hist) if latest.macd_hist is not none else "—" }}</td>
+        <th>ATR</th><td>{{ "%.2f"|format(latest.atr) if latest.atr is not none else "—" }}</td></tr>
+    <tr><th>EMA 9</th><td>{{ latest.ema_9|brl }}</th>
+        <th>EMA 21</th><td>{{ latest.ema_21|brl }}</td>
+        <th>EMA 50</th><td>{{ latest.ema_50|brl }}</td></tr>
+    <tr><th>Tech score</th><td colspan="5">{{ "%+.2f"|format(latest.tech_score) if latest.tech_score is not none else "—" }}</td></tr>
+  </table>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h2>Notícias recentes ({{ news|length }})</h2>
+  {% if news|length == 0 %}
+    <p class="muted">Sem notícias coletadas ainda. Rode <code>python -m src.jobs.daily</code>.</p>
+  {% else %}
+  <ul class="news-list">
+    {% for n in news %}
+    <li class="news-item sentiment-{{ 'pos' if n.sentiment > 0.1 else 'neg' if n.sentiment < -0.1 else 'neu' }}">
+      <a href="{{ n.link }}" target="_blank" rel="noopener">{{ n.title }}</a>
+      <div class="news-meta">
+        <span class="badge">{{ n.category }}</span>
+        <span class="muted">{{ n.source }}</span>
+        <span class="muted">{{ n.published|d }}</span>
+        <span class="muted">sent {{ "%+.2f"|format(n.sentiment) }} · rel {{ "%.2f"|format(n.relevance) }}</span>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+{% endblock %}

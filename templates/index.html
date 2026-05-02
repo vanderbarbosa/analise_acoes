@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Tickers — Análise de Ações{% endblock %}
+{% block content %}
+<h1>Tickers acompanhados</h1>
+<div class="cards">
+  {% for r in rows %}
+  <a class="card" href="{{ url_for('ticker_detail', symbol=r.symbol) }}">
+    <div class="card-header">
+      <span class="symbol">{{ r.symbol }}</span>
+      <span class="last-date">{{ r.last_date|d }}</span>
+    </div>
+    <div class="card-body">
+      <div class="last-close">{{ r.last_close|brl }}</div>
+      {% if r.prediction %}
+        {% set pred = r.prediction %}
+        <div class="prediction prediction-{{ pred.direction }}">
+          <span class="dir">{{ pred.direction|upper }}</span>
+          <span class="mag">{{ pred.magnitude_pct|pct }}</span>
+          <span class="conf">conf {{ "%.0f"|format(pred.confidence * 100) }}%</span>
+        </div>
+        <div class="for-date">para {{ pred.for_date|d }}</div>
+      {% else %}
+        <div class="prediction prediction-na">sem projeção ainda</div>
+      {% endif %}
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% if rows|length == 0 %}
+  <p>Sem tickers cadastrados — rode <code>python -m src.jobs.backfill</code> primeiro.</p>
+{% endif %}
+{% endblock %}
