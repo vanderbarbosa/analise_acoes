@@ -85,3 +85,22 @@ SQLite at `data/analise.db`, schema in `src/db/models.py`. `init_db()` is idempo
 ### Flask app
 
 `app.py` defines two routes (`/` and `/ticker/<symbol>`) plus three Jinja filters (`brl`, `pct`, `d`). Charts are server-rendered Plotly via `plotly.io.to_html(..., include_plotlyjs="cdn", full_html=False)` and embedded with `|safe`. Templates extend `templates/base.html`; styles in `static/css/app.css`.
+
+## Git / GitHub
+
+Remote: **https://github.com/vanderbarbosa/analise_acoes** (public). `origin` set to SSH (`git@github.com:vanderbarbosa/analise_acoes.git`) — uses the existing keyring auth from `gh`.
+
+### Auto-commit & push hook
+
+A Stop hook in `.claude/settings.json` runs `.claude/hooks/auto-commit.ps1` after every Claude turn. The script: stages everything, commits with `auto: <ISO timestamp> Claude session` if there are staged changes, pushes to `origin/main`. Failures (network, conflict, etc.) exit silently — they don't block Claude.
+
+**Implications when working in this repo:**
+- Don't leave a turn in a broken state expecting to "fix it next" — it'll be pushed publicly. Either finish the change or revert before ending the turn.
+- Manual commits still work normally (the hook is idempotent: nothing staged → no-op).
+- To pause auto-push for a session, comment out the hook block in `.claude/settings.json` or rename the script. To pause permanently, remove the Stop entry. Use `/hooks` to inspect.
+- The hook commits everything in the working tree (`git add -A`). Anything that shouldn't be public must be in `.gitignore` first. `.claude/settings.local.json` is already ignored (per-machine permission allowlist); `.env`, `data/*.db`, `.venv/` likewise.
+- Commit messages have no body — they're not meant to substitute for human commits. For a meaningful checkpoint, make a manual commit first; the next auto-commit will be a no-op.
+
+### Manual git operations
+
+The repo was initialized with `git init -b main` and the initial push used `gh repo create analise_acoes --public --source=. --remote=origin --push`. `gh` CLI is installed at `C:\Program Files\GitHub CLI\gh.exe` (not on the bash PATH in this session — invoke by full path or via PowerShell).
